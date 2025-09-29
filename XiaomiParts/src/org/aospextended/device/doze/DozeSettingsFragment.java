@@ -43,10 +43,9 @@ import org.aospextended.device.R;
 import org.aospextended.device.util.Utils;
 
 import com.android.settingslib.widget.MainSwitchPreference;
-import com.android.settingslib.widget.OnMainSwitchChangeListener;
 
 public class DozeSettingsFragment extends PreferenceFragmentCompat implements OnPreferenceChangeListener,
-        OnMainSwitchChangeListener {
+        CompoundButton.OnCheckedChangeListener {
 
     private MainSwitchPreference mSwitchBar;
 
@@ -73,7 +72,7 @@ public class DozeSettingsFragment extends PreferenceFragmentCompat implements On
         boolean dozeEnabled = DozeUtils.isDozeEnabled(requireActivity());
 
         mSwitchBar = (MainSwitchPreference) findPreference(DozeUtils.DOZE_ENABLE);
-        mSwitchBar.addOnSwitchChangeListener(this);
+        mSwitchBar.setOnCheckedChangeListener(this);
         mSwitchBar.setChecked(dozeEnabled);
 
         mAlwaysOnDisplayPreference = (SwitchPreference) findPreference(DozeUtils.ALWAYS_ON_DISPLAY);
@@ -133,7 +132,7 @@ public class DozeSettingsFragment extends PreferenceFragmentCompat implements On
     }
 
     @Override
-    public void onSwitchChanged(Switch switchView, boolean isChecked) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         DozeUtils.enableDoze(requireActivity(), isChecked);
         DozeUtils.checkDozeService(requireActivity());
 

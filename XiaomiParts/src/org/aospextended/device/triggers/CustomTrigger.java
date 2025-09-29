@@ -29,8 +29,8 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
 import com.android.settingslib.widget.MainSwitchPreference;
-import com.android.settingslib.widget.OnMainSwitchChangeListener;
 import com.android.internal.os.DeviceKeyHandler;
+import android.widget.CompoundButton;
 
 import org.aospextended.device.util.Action;
 import org.aospextended.device.util.Utils;
@@ -40,7 +40,7 @@ import org.aospextended.device.R;
 import org.aospextended.device.util.ShortcutPickerHelper;
 
 public class CustomTrigger extends PreferenceFragmentCompat implements
-        OnPreferenceChangeListener, OnMainSwitchChangeListener,
+        OnPreferenceChangeListener, CompoundButton.OnCheckedChangeListener,
 	OnPreferenceClickListener, ShortcutPickerHelper.OnPickListener {
 
     private static final String TAG = "CustomTrigger";
@@ -103,7 +103,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
 	boolean enableCustomTrigger = Utils.getIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1) == 1;
 
 	mEnableCustomTrigger = (MainSwitchPreference) findPreference(PREF_CUSTOM_TRIGGER_ENABLE);
-        mEnableCustomTrigger.addOnSwitchChangeListener(this);
+        mEnableCustomTrigger.setOnCheckedChangeListener(this);
         mEnableCustomTrigger.setChecked(enableCustomTrigger);
 
 	mLeftTriggerDoubleClick = (Preference) prefs.findPreference(PREF_LEFT_TRIGGER_DOUBLE_CLICK);
@@ -186,7 +186,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
     }
 
     @Override
-    public void onSwitchChanged(Switch switchView, boolean isChecked) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         mEnableCustomTrigger.setChecked(isChecked);
         Utils.putIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, isChecked ? 1 : 0);
     }

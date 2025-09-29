@@ -19,7 +19,7 @@
     <uses-sdk
         android:minSdkVersion="24"
         android:targetSdkVersion="34"/>
-
+]
     <application
             android:icon="@android:drawable/sym_def_app_icon"
             android:label="@string/XiaomiParts"
@@ -42,7 +42,8 @@
         <activity-alias
             android:name=".XiaomiParts"
             android:label="@string/XiaomiParts"
-            android:targetActivity="XiaomiPartsActivity">
+            android:targetActivity="XiaomiPartsActivity"
+            android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
@@ -65,7 +66,8 @@
 
         <activity
             android:name=".gestures.TouchGesturesActivity"
-            android:label="@string/screen_off_gestures">
+            android:label="@string/screen_off_gestures"
+            android:exported="true">
           <intent-filter>
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
           </intent-filter>
@@ -86,15 +88,17 @@
 
         <activity
             android:name=".doze.DozeSettingsActivity"
-            android:label="@string/ambient_display_title">
+            android:label="@string/ambient_display_title"
+            android:exported="false">
             <intent-filter>
                 <action android:name="org.aospextended.device.DOZE_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".util.AppListActivity" 
-            android:label="@string/app_list">
+        <activity android:name=".util.AppListActivity"
+            android:label="@string/app_list"
+            android:exported="false">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

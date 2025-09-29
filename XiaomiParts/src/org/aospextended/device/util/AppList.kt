@@ -139,9 +139,9 @@ class AppList: Fragment(R.layout.app_list_layout) {
     private fun refreshList() {
         var list = packageList.filter {
             when (category) {
-                CATEGORY_SYSTEM_ONLY -> it.applicationInfo.isSystemApp()
-                CATEGORY_USER_ONLY -> !it.applicationInfo.isSystemApp()
-                else -> true
+                CATEGORY_SYSTEM_ONLY -> it.applicationInfo?.isSystemApp() == true
+                CATEGORY_USER_ONLY -> it.applicationInfo?.isSystemApp() == false
+                else -> it.applicationInfo != null
             }
         }.filter {
             getLabel(it).contains(searchText, true)
@@ -163,11 +163,11 @@ class AppList: Fragment(R.layout.app_list_layout) {
         AppInfo(
             packageInfo.packageName,
             getLabel(packageInfo),
-            packageInfo.applicationInfo.loadIcon(packageManager),
+            packageInfo.applicationInfo?.loadIcon(packageManager) ?: packageManager.defaultActivityIcon,
         )
 
     private fun getLabel(packageInfo: PackageInfo) =
-        packageInfo.applicationInfo.loadLabel(packageManager).toString()
+        packageInfo.applicationInfo?.loadLabel(packageManager)?.toString() ?: packageInfo.packageName
 
     private inner class AppListAdapter: ListAdapter<AppInfo, AppListViewHolder>(itemCallback) {
         private val selectedIndices = mutableSetOf<Int>()
