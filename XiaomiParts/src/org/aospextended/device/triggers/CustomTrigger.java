@@ -40,7 +40,7 @@ import org.aospextended.device.R;
 import org.aospextended.device.util.ShortcutPickerHelper;
 
 public class CustomTrigger extends PreferenceFragmentCompat implements
-        OnPreferenceChangeListener, CompoundButton.OnCheckedChangeListener,
+        OnPreferenceChangeListener,
 	OnPreferenceClickListener, ShortcutPickerHelper.OnPickListener {
 
     private static final String TAG = "CustomTrigger";
@@ -103,7 +103,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
 	boolean enableCustomTrigger = Utils.getIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1) == 1;
 
 	mEnableCustomTrigger = (MainSwitchPreference) findPreference(PREF_CUSTOM_TRIGGER_ENABLE);
-        mEnableCustomTrigger.setOnCheckedChangeListener(this);
+        mEnableCustomTrigger.setOnPreferenceChangeListener(this);
         mEnableCustomTrigger.setChecked(enableCustomTrigger);
 
 	mLeftTriggerDoubleClick = (Preference) prefs.findPreference(PREF_LEFT_TRIGGER_DOUBLE_CLICK);
@@ -177,18 +177,17 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         final String key = preference.getKey();
-        if (KEY_TRIGGER_HAPTIC_FEEDBACK.equals(key)) {
-                final boolean value = (boolean) newValue;
-                Utils.putIntSystem(requireActivity(), KEY_TRIGGER_HAPTIC_FEEDBACK, value ? 1 : 0);
-                return true;
+        if (PREF_CUSTOM_TRIGGER_ENABLE.equals(key)) {
+            boolean isChecked = (Boolean) newValue;
+            Utils.putIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, isChecked ? 1 : 0);
+            mHapticFeedback.setEnabled(isChecked);
+            return true;
+        } else if (KEY_TRIGGER_HAPTIC_FEEDBACK.equals(key)) {
+            final boolean value = (boolean) newValue;
+            Utils.putIntSystem(requireActivity(), KEY_TRIGGER_HAPTIC_FEEDBACK, value ? 1 : 0);
+            return true;
         }
         return false;
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        mEnableCustomTrigger.setChecked(isChecked);
-        Utils.putIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, isChecked ? 1 : 0);
     }
 
     // Reset all entries to default.
