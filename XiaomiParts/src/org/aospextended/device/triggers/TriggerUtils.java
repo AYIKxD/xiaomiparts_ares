@@ -177,11 +177,14 @@ public class TriggerUtils {
 
     public void onEvent(KeyEvent event) {
         if (DEBUG) Slog.d(TAG, "onEvent");
+        int keyCode = event.getKeyCode();
+        // Left trigger keycode is 59 (0x3b)
+        boolean isLeft = keyCode == 59;
         if (isDoubleClick(event)) {
-            handleDoubleClick(event.getKeyCode() == 131);
+            handleDoubleClick(isLeft);
         }
         if (isLongPress(event)) {
-            handleLongPress(event.getKeyCode() == 131);
+            handleLongPress(isLeft);
         }
     }
 

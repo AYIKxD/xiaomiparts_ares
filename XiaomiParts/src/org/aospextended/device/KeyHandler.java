@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -43,7 +42,6 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -96,12 +94,6 @@ public class KeyHandler implements DeviceKeyHandler {
 
     private int mTriggerAction;
 
-    long mPrevEventTime;
-    boolean mLeftOpen, mLeftClosed;
-    boolean mRightOpen, mRightClosed;
-
-    private final CustomSettingsObserver mCustomSettingsObserver;
-
     public TriggerUtils tr = null;
     public TriggerService triggerService;
 
@@ -112,59 +104,8 @@ public class KeyHandler implements DeviceKeyHandler {
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         mAppContext = Utils.getAppContext(mContext);
-        mCustomSettingsObserver = new CustomSettingsObserver(new Handler(Looper.getMainLooper()));
-        mCustomSettingsObserver.observe();
         tr = TriggerUtils.getInstance(mAppContext);
         triggerService = TriggerService.getInstance(mAppContext);
-    }
-
-    private class CustomSettingsObserver extends ContentObserver {
-        CustomSettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void update() {
-            onChange(false, Settings.System.getUriFor("trigger_sound"));
-        }
-
-        void observe() {
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor("triggerleft"),
-                    false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor("triggerright"),
-                    false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor("trigger_sound"),
-                    false, this, UserHandle.USER_ALL);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            if (uri.equals(Settings.System.getUriFor("trigger_sound"))) {
-                if (Settings.System.getInt(mContext.getContentResolver(), "trigger_sound", 0) == 1) {
-                    tr.loadSoundResource();
-                } else {
-                    tr.releaseSoundResource();
-                }
-                return;
-            }
-            boolean left = uri.equals(Settings.System.getUriFor("triggerleft"));
-            boolean open = Utils.getIntSystem(mContext, left ? "triggerleft" : "triggerright", -1) == 1;
-            tr.triggerAction(left, open);
-            long now = SystemClock.uptimeMillis();
-            long time = now - mPrevEventTime;
-            if (time < 3000 && ((mLeftOpen && !left && open) || (mRightOpen && left && open))) {
-                if (DEBUG) Slog.d(TAG, "starting service");
-                triggerService.show();
-            } else if (time < 3000 && ((mLeftClosed && !left && !open) || (mRightClosed && left && !open))) {
-                if (DEBUG) Slog.d(TAG, "stopping service");
-                triggerService.hide();
-            }
-            mPrevEventTime = now;
-            mLeftOpen = left && open;
-            mRightOpen = !left && open;
-            mLeftClosed = left && !open;
-            mRightClosed = !left && !open;
-        }
-
     }
 
     private class EventHandler extends Handler {
@@ -274,7 +215,7 @@ public class KeyHandler implements DeviceKeyHandler {
     public KeyEvent handleKeyEvent(KeyEvent event) {
         if (DEBUG) Slog.d(TAG, "Got KeyEvent: " + event);
 
-        if (event.getDevice().getProductId() == 1576) {
+        if (event.getDevice().getProductId() == 0628) {
             return handleTriggerEvent(event);
         }
 
@@ -297,16 +238,47 @@ public class KeyHandler implements DeviceKeyHandler {
     }
 
     public KeyEvent handleTriggerEvent(KeyEvent event) {
-        if (!Utils.isGameApp(mContext)) {
-            if (DEBUG) Slog.d(TAG, "not a game app");
-            tr.onEvent(event);
-            return event;
+        int keyCode = event.getKeyCode();
+        boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+
+        // Only handle key down events for sliders to avoid duplicate actions
+        if (down) {
+            switch (keyCode) {
+                // Left slider open
+                case 61: // 0x3d
+                    tr.triggerAction(true, true);
+                    break;
+                // Left slider close
+                case 62: // 0x3e
+                    tr.triggerAction(true, false);
+                    break;
+                // Right slider open
+                case 63: // 0x3f
+                    tr.triggerAction(false, true);
+                    break;
+                // Right slider close
+                case 64: // 0x40
+                    tr.triggerAction(false, false);
+                    break;
+            }
         }
 
-        boolean down = event.getAction() == MotionEvent.ACTION_DOWN;
-        Utils.writeValue(event.getKeyCode() == 131 ?
-                "/proc/touchpanel/left_trigger_enable" :
-                "/proc/touchpanel/right_trigger_enable" , down ? "1" : "0");
+        // Handle trigger presses (both up and down events are needed for onEvent and gaming)
+        switch (keyCode) {
+            // Left trigger press
+            case 59: // 0x3b
+            // Right trigger press
+            case 60: // 0x3c
+                if (!Utils.isGameApp(mContext)) {
+                    if (DEBUG) Slog.d(TAG, "not a game app, trigger press");
+                    tr.onEvent(event);
+                } else {
+                    Utils.writeValue(keyCode == 59 ?
+                            "/proc/touchpanel/left_trigger_enable" :
+                            "/proc/touchpanel/right_trigger_enable", down ? "1" : "0");
+                }
+                break;
+        }
 
         return event;
     }

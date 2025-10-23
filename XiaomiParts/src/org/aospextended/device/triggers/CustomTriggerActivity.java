@@ -1,19 +1,15 @@
 package org.aospextended.device.triggers;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
-import com.android.settingslib.collapsingtoolbar.R;
-
-public class CustomTriggerActivity extends CollapsingToolbarBaseActivity {
+public class CustomTriggerActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame,
+        getFragmentManager().beginTransaction().replace(android.R.id.content,
                 new CustomTrigger()).commit();
     }
 

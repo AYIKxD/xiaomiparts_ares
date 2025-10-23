@@ -3,7 +3,7 @@ package org.aospextended.device.triggers;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import androidx.fragment.app.DialogFragment;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,13 +20,13 @@ import android.view.MenuItem;
 import android.view.KeyEvent;
 import android.widget.Switch;
 
-import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
-import androidx.preference.Preference.OnPreferenceChangeListener;
-import androidx.preference.Preference.OnPreferenceClickListener;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreference;
+import android.preference.Preference;
+import android.preference.PreferenceCategory;
+import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 
 import com.android.settingslib.widget.MainSwitchPreference;
 import com.android.internal.os.DeviceKeyHandler;
@@ -39,7 +39,7 @@ import org.aospextended.device.KeyHandler;
 import org.aospextended.device.R;
 import org.aospextended.device.util.ShortcutPickerHelper;
 
-public class CustomTrigger extends PreferenceFragmentCompat implements
+public class CustomTrigger extends PreferenceFragment implements
         OnPreferenceChangeListener,
 	OnPreferenceClickListener, ShortcutPickerHelper.OnPickListener {
 
@@ -78,9 +78,10 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
     int mKeycode, mEventAction;
 
     @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        mPicker = new ShortcutPickerHelper(requireActivity(), this);
+        mPicker = new ShortcutPickerHelper(getActivity(), this);
 
         mActionValues = getResources().getStringArray(R.array.action_screen_off_values);
         mActionEntries = getResources().getStringArray(R.array.action_screen_off_entries);
@@ -100,7 +101,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
 
         prefs = getPreferenceScreen();
 
-	boolean enableCustomTrigger = Utils.getIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1) == 1;
+	boolean enableCustomTrigger = Utils.getIntSystem(getActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1) == 1;
 
 	mEnableCustomTrigger = (MainSwitchPreference) findPreference(PREF_CUSTOM_TRIGGER_ENABLE);
         mEnableCustomTrigger.setOnPreferenceChangeListener(this);
@@ -114,16 +115,16 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
         PreferenceCategory haptic = (PreferenceCategory) prefs.findPreference("haptic");
         mHapticFeedback = (SwitchPreference) findPreference(KEY_TRIGGER_HAPTIC_FEEDBACK);
 	mHapticFeedback.setEnabled(enableCustomTrigger);
-        mHapticFeedback.setChecked(Utils.getIntSystem(requireActivity(), KEY_TRIGGER_HAPTIC_FEEDBACK, 1) != 0);
+        mHapticFeedback.setChecked(Utils.getIntSystem(getActivity(), KEY_TRIGGER_HAPTIC_FEEDBACK, 1) != 0);
         mHapticFeedback.setOnPreferenceChangeListener(this);
 
-	setPref(mLeftTriggerDoubleClick, Utils.getStringSystem(requireActivity(), PREF_LEFT_TRIGGER_DOUBLE_CLICK,
+	setPref(mLeftTriggerDoubleClick, Utils.getStringSystem(getActivity(), PREF_LEFT_TRIGGER_DOUBLE_CLICK,
                 Action.ACTION_NULL));
-	setPref(mRightTriggerDoubleClick, Utils.getStringSystem(requireActivity(), PREF_RIGHT_TRIGGER_DOUBLE_CLICK,
+	setPref(mRightTriggerDoubleClick, Utils.getStringSystem(getActivity(), PREF_RIGHT_TRIGGER_DOUBLE_CLICK,
 		Action.ACTION_NULL));
-        setPref(mLeftTriggerLongpress, Utils.getStringSystem(requireActivity(), PREF_LEFT_TRIGGER_LONGPRESS,
+        setPref(mLeftTriggerLongpress, Utils.getStringSystem(getActivity(), PREF_LEFT_TRIGGER_LONGPRESS,
                 Action.ACTION_NULL));
-        setPref(mRightTriggerLongpress, Utils.getStringSystem(requireActivity(), PREF_RIGHT_TRIGGER_LONGPRESS,
+        setPref(mRightTriggerLongpress, Utils.getStringSystem(getActivity(), PREF_RIGHT_TRIGGER_LONGPRESS,
                 Action.ACTION_NULL));
         return prefs;
     }
@@ -179,12 +180,12 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
         final String key = preference.getKey();
         if (PREF_CUSTOM_TRIGGER_ENABLE.equals(key)) {
             boolean isChecked = (Boolean) newValue;
-            Utils.putIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, isChecked ? 1 : 0);
+            Utils.putIntSystem(getActivity(), PREF_CUSTOM_TRIGGER_ENABLE, isChecked ? 1 : 0);
             mHapticFeedback.setEnabled(isChecked);
             return true;
         } else if (KEY_TRIGGER_HAPTIC_FEEDBACK.equals(key)) {
             final boolean value = (boolean) newValue;
-            Utils.putIntSystem(requireActivity(), KEY_TRIGGER_HAPTIC_FEEDBACK, value ? 1 : 0);
+            Utils.putIntSystem(getActivity(), KEY_TRIGGER_HAPTIC_FEEDBACK, value ? 1 : 0);
             return true;
         }
         return false;
@@ -193,15 +194,15 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
     // Reset all entries to default.
     private void resetToDefault() {
 
-        Utils.putIntSystem(requireActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1);
+        Utils.putIntSystem(getActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1);
 
-	Utils.putStringSystem(requireActivity(), PREF_LEFT_TRIGGER_DOUBLE_CLICK,
+	Utils.putStringSystem(getActivity(), PREF_LEFT_TRIGGER_DOUBLE_CLICK,
                 Action.ACTION_NULL);
-        Utils.putStringSystem(requireActivity(), PREF_RIGHT_TRIGGER_DOUBLE_CLICK,
+        Utils.putStringSystem(getActivity(), PREF_RIGHT_TRIGGER_DOUBLE_CLICK,
                 Action.ACTION_NULL);
-        Utils.putStringSystem(requireActivity(), PREF_LEFT_TRIGGER_LONGPRESS,
+        Utils.putStringSystem(getActivity(), PREF_LEFT_TRIGGER_LONGPRESS,
                 Action.ACTION_NULL);
-        Utils.putStringSystem(requireActivity(), PREF_RIGHT_TRIGGER_LONGPRESS,
+        Utils.putStringSystem(getActivity(), PREF_RIGHT_TRIGGER_LONGPRESS,
                 Action.ACTION_NULL);
 	mHapticFeedback.setChecked(true);
 	initPrefs();
@@ -218,7 +219,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
         if (mPendingkey == null || action == null) {
             return;
         }
-        Utils.putStringSystem(requireActivity(), mPendingkey, action);
+        Utils.putStringSystem(getActivity(), mPendingkey, action);
         initPrefs();
         mPendingkey = null;
     }
@@ -258,7 +259,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
         DialogFragment newFragment =
                 MyAlertDialogFragment.newInstance(id, key, title);
         newFragment.setTargetFragment(this, 0);
-        newFragment.show(getParentFragmentManager(), "dialog " + id);
+        newFragment.show(getFragmentManager(), "dialog " + id);
     }
 
     public static class MyAlertDialogFragment extends DialogFragment {
@@ -285,7 +286,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
             int title = getArguments().getInt("title");
             switch (id) {
                 case DLG_SHOW_ACTION_DIALOG:
-                    return new AlertDialog.Builder(requireActivity())
+                    return new AlertDialog.Builder(getActivity())
                     .setTitle(title)
                     .setNegativeButton(R.string.cancel, null)
                     .setItems(getOwner().mActionEntries,
@@ -298,7 +299,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
                                     getOwner().mPicker.pickShortcut(getOwner().getId());
                                 }
                             } else {
-                                    Utils.putStringSystem(getOwner().requireActivity(), key,
+                                    Utils.putStringSystem(getOwner().getActivity(), key,
                                         getOwner().mActionValues[item]);
                                 getOwner().initPrefs();
                             }
@@ -306,7 +307,7 @@ public class CustomTrigger extends PreferenceFragmentCompat implements
                     })
                     .create();
                 case DLG_RESET_TO_DEFAULT:
-                    return new AlertDialog.Builder(requireActivity())
+                    return new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.reset)
                     .setMessage(R.string.reset_message)
                     .setNegativeButton(R.string.cancel, null)
