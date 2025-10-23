@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -42,6 +43,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -94,6 +96,8 @@ public class KeyHandler implements DeviceKeyHandler {
 
     private int mTriggerAction;
 
+    private final SoundSettingObserver mSoundSettingObserver;
+
     public TriggerUtils tr = null;
     public TriggerService triggerService;
 
@@ -104,8 +108,34 @@ public class KeyHandler implements DeviceKeyHandler {
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         mAppContext = Utils.getAppContext(mContext);
+        mSoundSettingObserver = new SoundSettingObserver(new Handler(Looper.getMainLooper()));
+        mSoundSettingObserver.observe();
         tr = TriggerUtils.getInstance(mAppContext);
         triggerService = TriggerService.getInstance(mAppContext);
+    }
+
+    private class SoundSettingObserver extends ContentObserver {
+        SoundSettingObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor("trigger_sound"),
+                    false, this, UserHandle.USER_ALL);
+            // Initial check
+            onChange(false, Settings.System.getUriFor("trigger_sound"));
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor("trigger_sound"))) {
+                if (Settings.System.getInt(mContext.getContentResolver(), "trigger_sound", 0) == 1) {
+                    tr.loadSoundResource();
+                } else {
+                    tr.releaseSoundResource();
+                }
+            }
+        }
     }
 
     private class EventHandler extends Handler {
