@@ -28,7 +28,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 
-import com.android.settingslib.widget.MainSwitchPreference;
 import com.android.internal.os.DeviceKeyHandler;
 import android.widget.CompoundButton;
 
@@ -59,7 +58,7 @@ public class CustomTrigger extends PreferenceFragment implements
 
     private static final int MENU_RESET = Menu.FIRST;
 
-    private MainSwitchPreference mEnableCustomTrigger;
+    private SwitchPreference mEnableCustomTrigger;
 
     private Preference mLeftTriggerDoubleClick, mRightTriggerDoubleClick, mLeftTriggerLongpress, mRightTriggerLongpress;
 
@@ -103,7 +102,7 @@ public class CustomTrigger extends PreferenceFragment implements
 
 	boolean enableCustomTrigger = Utils.getIntSystem(getActivity(), PREF_CUSTOM_TRIGGER_ENABLE, 1) == 1;
 
-	mEnableCustomTrigger = (MainSwitchPreference) findPreference(PREF_CUSTOM_TRIGGER_ENABLE);
+	mEnableCustomTrigger = (SwitchPreference) findPreference(PREF_CUSTOM_TRIGGER_ENABLE);
         mEnableCustomTrigger.setOnPreferenceChangeListener(this);
         mEnableCustomTrigger.setChecked(enableCustomTrigger);
 

@@ -245,7 +245,7 @@ public class KeyHandler implements DeviceKeyHandler {
     public KeyEvent handleKeyEvent(KeyEvent event) {
         if (DEBUG) Slog.d(TAG, "Got KeyEvent: " + event);
 
-        if (event.getDevice().getProductId() == 0628) {
+        if (event.getDevice().getProductId() == 628) {
             return handleTriggerEvent(event);
         }
 
